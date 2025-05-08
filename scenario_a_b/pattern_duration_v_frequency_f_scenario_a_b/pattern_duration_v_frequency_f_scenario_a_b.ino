@@ -100,6 +100,13 @@ void runTask_IdentifyShortest() {
   Serial.println("\nTask: Identify Shortest");
   Serial.print("Trial: "); Serial.println(currentTrial + 1);
 
+  Serial.print("Order: ");
+   for (int k = 0; k < 8; k++) {
+    Serial.print(randomized[k]);
+      if (k < 7) Serial.print(", ");
+    }
+    Serial.println();
+
   bool answered = false;
   unsigned long startTime = millis();
 
@@ -144,6 +151,13 @@ void runTask_IdentifyLongest() {
   Serial.println("\nTask: Identify Longest");
   Serial.print("Trial: "); Serial.println(currentTrial + 1);
 
+  Serial.print("Order: ");
+    for (int k = 0; k < 8; k++) {
+    Serial.print(randomized[k]);
+      if (k < 7) Serial.print(", ");
+    }
+    Serial.println();
+
   bool answered = false;
   unsigned long startTime = millis();
 
@@ -161,7 +175,7 @@ void runTask_IdentifyLongest() {
         Serial.print("Response time: "); Serial.print(responseTime); Serial.println(" ms");
         Serial.print("Button: "); Serial.println(i);
         Serial.print("Selected duration: "); Serial.println(selected);
-        Serial.print("Correct: "); Serial.println(selected == maxVal ? "yes" : "no");
+        Serial.print("Correct: "); Serial.println(selected == maxVal  ? "yes" : "no");
 
         answered = true;
         delay(1000);
@@ -185,8 +199,15 @@ void runTask_SortBySwapping() {
   shuffleArray(pulseDurations, assigned, 8);
   for (int i = 0; i < 8; i++) motorTimers[i] = millis();
 
-  Serial.println("\nTask: Sort by Swapping");
+  Serial.println("Task: Sort Values");
   Serial.print("Trial: "); Serial.println(currentTrial + 1);
+
+  Serial.print("Initial order: ");
+  for (int i = 0; i < 8; i++) {
+    Serial.print(assigned[i]);
+    if (i < 7) Serial.print(", ");
+  }
+  Serial.println();
 
   int firstClick = -1;
   int lastButton = -1;
@@ -200,13 +221,25 @@ void runTask_SortBySwapping() {
 
       if (previousButtonStates[i] && current) {
         if (waitingSecond && i == firstClick && i == 7 && lastButton == 7) {
-          Serial.println("Double-click on button 7 — Task complete");
+          Serial.println("\n(Participant presses button 7 twice to finish)");
+          Serial.println("\nTask completed!");
           finished = true;
           break;
         } else if (waitingSecond && i != firstClick) {
+          Serial.print("Swap recorded: Button "); Serial.print(firstClick);
+          Serial.print(" ↔ Button "); Serial.println(i);
+
           int tmp = assigned[firstClick];
           assigned[firstClick] = assigned[i];
           assigned[i] = tmp;
+
+          Serial.print("New order:     ");
+          for (int j = 0; j < 8; j++) {
+            Serial.print(assigned[j]);
+            if (j < 7) Serial.print(", ");
+          }
+          Serial.println();
+
           waitingSecond = false;
           firstClick = -1;
         } else {
@@ -221,7 +254,7 @@ void runTask_SortBySwapping() {
     }
   }
 
-  // Evaluate sorting correctness
+  // Evaluate correctness
   int correct[8];
   for (int i = 0; i < 8; i++) correct[i] = pulseDurations[i];
   for (int i = 0; i < 7; i++)
@@ -235,6 +268,20 @@ void runTask_SortBySwapping() {
     if (assigned[i] == correct[i]) hits++;
   }
 
+  Serial.print("Final order:   ");
+  for (int i = 0; i < 8; i++) {
+    Serial.print(assigned[i]);
+    if (i < 7) Serial.print(", ");
+  }
+  Serial.println();
+
+  Serial.print("Correct order: ");
+  for (int i = 0; i < 8; i++) {
+    Serial.print(correct[i]);
+    if (i < 7) Serial.print(", ");
+  }
+  Serial.println();
+
   Serial.print("Correct positions: "); Serial.println(hits);
   Serial.print("Sorted correctly: "); Serial.println(hits == 8 ? "yes" : "no");
 
@@ -246,6 +293,7 @@ void runTask_SortBySwapping() {
     if (currentGroup < TOTAL_GROUPS) pauseBetweenTasks();
   }
 }
+
 
 // === MAIN LOOP ===
 void loop() {
